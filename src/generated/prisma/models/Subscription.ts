@@ -14,12 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model Subscription
- * A Polar subscription, mirrored so the app never asks Polar anything.
  * 
- * It is a mirror, not an authority: `Entitlement` is what the application reads
- * for limits, and this row exists to show a person what they are paying for and
- * to give the webhook something to reconcile against. See
- * docs/ARCHITECTURE.md, "Entitlements are the only limit authority".
  */
 export type SubscriptionModel = runtime.Types.Result.DefaultSelection<Prisma.$SubscriptionPayload>
 

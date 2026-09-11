@@ -14,11 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model Attachment
- * A file on a task.
  * 
- * Keyed by **object key**, never a URL: a stored URL cannot be re-signed and
- * does not survive a bucket move. Every URL this app serves is minted on demand
- * and expires in minutes — docs/ARCHITECTURE.md, "Storage is provider-neutral".
  */
 export type AttachmentModel = runtime.Types.Result.DefaultSelection<Prisma.$AttachmentPayload>
 

@@ -14,9 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model TaskLabel
- * A pure join. Composite primary key rather than a surrogate id: nothing ever
- * refers to one of these rows by id, and a uuid column on a join table is a
- * second btree paid for on every tag and untag.
+ * 
  */
 export type TaskLabelModel = runtime.Types.Result.DefaultSelection<Prisma.$TaskLabelPayload>
 

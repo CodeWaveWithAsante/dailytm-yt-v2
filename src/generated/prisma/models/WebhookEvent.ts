@@ -14,14 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model WebhookEvent
- * One row per webhook event id. The whole of webhook idempotency.
  * 
- * Same shape as Phase 3's reminder dedupe and the same argument: "replaying an
- * event produces one state change" is a database property or it is a race. The
- * handler inserts here first and returns on a unique violation.
- * 
- * `id` is the provider's event id, so it takes no `@default` — and no foreign
- * key anywhere, because this table describes messages rather than tenants.
  */
 export type WebhookEventModel = runtime.Types.Result.DefaultSelection<Prisma.$WebhookEventPayload>
 

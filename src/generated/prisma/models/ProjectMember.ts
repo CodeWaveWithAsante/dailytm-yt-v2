@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model ProjectMember
- * Rows exist only for `RESTRICTED` projects.
+ * 
  */
 export type ProjectMemberModel = runtime.Types.Result.DefaultSelection<Prisma.$ProjectMemberPayload>
 

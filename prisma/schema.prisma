@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -40,6 +41,8 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  activeOrganizationId String?
 
   @@unique([token])
   @@index([userId])
@@ -170,6 +173,7 @@ model Member {
   @@unique([organizationId, userId])
   @@index([userId])
   @@map("member")
+  @@index([organizationId])
 }
 
 model Invitation {
@@ -233,9 +237,9 @@ model ActivityEvent {
   payload   Json     @default("{}")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  /// The project activity feed, newest first.
   @@index([organizationId, createdAt])
   @@index([actorId])
-  /// The project activity feed, newest first.
   @@index([projectId, createdAt])
   @@map("activity_event")
 }
@@ -304,6 +308,7 @@ model Project {
 }
 
 /// Rows exist only for `RESTRICTED` projects.
+
 model ProjectMember {
   id        String   @id @default(uuid(7))
   projectId String   @map("project_id")
@@ -416,12 +421,12 @@ model Task {
   /// two identical btrees, one of them strictly worse, and charge every task
   /// write for both.
   /// My Tasks and the overdue grouping.
-  @@index([organizationId, assigneeId, dueDate])
   /// The calendar month window, and every due-date filter that is not mine.
+  /// The subtask rollup, and the cascade when a parent is deleted.
+  @@index([organizationId, assigneeId, dueDate])
   @@index([organizationId, dueDate])
   @@index([projectId])
   @@index([statusId])
-  /// The subtask rollup, and the cascade when a parent is deleted.
   @@index([parentId])
   @@map("task")
 }
@@ -453,8 +458,8 @@ model WorkflowStatus {
   /// A reorder therefore cannot be a loop of updates — the second one would
   /// collide with a position the first has not vacated. See the single
   /// statement in `workflow-status.service.ts`.
-  @@unique([projectId, position])
   /// Two columns called "Done" on one board is a defect, not a preference.
+  @@unique([projectId, position])
   @@unique([projectId, name])
   @@index([organizationId])
   @@map("workflow_status")
@@ -463,6 +468,7 @@ model WorkflowStatus {
 /// Organization-scoped, not per-project, so a label means the same thing on
 /// every board. That is the whole point of it: "blocked-on-design" filed under
 /// two projects with two different ids is two labels that merely look alike.
+
 model Label {
   id             String       @id @default(uuid(7))
   organizationId String       @map("organization_id")
@@ -481,6 +487,7 @@ model Label {
 /// A pure join. Composite primary key rather than a surrogate id: nothing ever
 /// refers to one of these rows by id, and a uuid column on a join table is a
 /// second btree paid for on every tag and untag.
+
 model TaskLabel {
   taskId  String @map("task_id")
   task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -552,6 +559,7 @@ model Comment {
 /// Invitation is **not** here. It ships as an email from Phase 1 and goes to
 /// someone who is not a user yet — there is no inbox to write to and no
 /// preference row to read.
+
 enum NotificationType {
   TASK_ASSIGNED
   MENTION
@@ -610,16 +618,16 @@ model Notification {
   readAt    DateTime? @map("read_at") @db.Timestamptz(3)
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  @@unique([userId, type, dedupeKey])
   /// The inbox page: equality on the two scoping columns, then the sort column.
+  /// The unread badge is a **partial** index, hand-written into the migration:
+  /// it is read on every page load and matches a small fraction of the rows.
+  /// Prisma cannot express `WHERE read_at IS NULL`, so it is not declared here.
+  @@unique([userId, type, dedupeKey])
   @@index([userId, organizationId, createdAt])
   @@index([taskId])
   @@index([commentId])
   @@index([actorId])
   @@index([organizationId])
-  /// The unread badge is a **partial** index, hand-written into the migration:
-  /// it is read on every page load and matches a small fraction of the rows.
-  /// Prisma cannot express `WHERE read_at IS NULL`, so it is not declared here.
   @@map("notification")
 }
 
@@ -636,6 +644,7 @@ model Notification {
 /// Every column defaults to `true`, and an absent row reads as all-true, so a
 /// person who never opens the settings screen gets the same behaviour as one who
 /// opened it and changed nothing.
+
 model NotificationPreference {
   id String @id @default(uuid(7))
 
@@ -674,6 +683,7 @@ enum AttachmentStatus {
 /// Keyed by **object key**, never a URL: a stored URL cannot be re-signed and
 /// does not survive a bucket move. Every URL this app serves is minted on demand
 /// and expires in minutes — docs/ARCHITECTURE.md, "Storage is provider-neutral".
+
 model Attachment {
   id String @id @default(uuid(7))
 
@@ -715,14 +725,14 @@ model Attachment {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   /// The details sheet's list.
-  @@index([taskId, createdAt])
   /// The usage SUM, and the tenant filter on every read.
-  @@index([organizationId, status])
-  @@index([uploaderId])
   /// The sweep's index is **not** declared here. It is `(status, created_at)
   /// WHERE status <> 'READY'`, hand-written into the migration, because Prisma
   /// cannot express a partial index and the non-partial twin would index every
   /// settled row to find the handful that are not.
+  @@index([taskId, createdAt])
+  @@index([organizationId, status])
+  @@index([uploaderId])
   @@map("attachment")
 }
 
@@ -732,6 +742,7 @@ model Attachment {
 /// for limits, and this row exists to show a person what they are paying for and
 /// to give the webhook something to reconcile against. See
 /// docs/ARCHITECTURE.md, "Entitlements are the only limit authority".
+
 model Subscription {
   id String @id @default(uuid(7))
 
@@ -767,6 +778,7 @@ model Subscription {
 ///
 /// `id` is the provider's event id, so it takes no `@default` — and no foreign
 /// key anywhere, because this table describes messages rather than tenants.
+
 model WebhookEvent {
   id         String   @id
   provider   String   @default("polar")

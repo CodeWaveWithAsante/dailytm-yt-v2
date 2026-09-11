@@ -14,19 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model NotificationPreference
- * One row per person per organization, written the first time somebody changes
- * one — never on a read, because the settings screen is opened far less often
- * than the pages that consult it and a read-through insert would put a write
- * on the path of every notification.
  * 
- * Only email is configurable. The inbox always records everything, so the row
- * is a complete history of what happened to you and a muted channel cannot
- * erase it — a type × channel matrix would let someone silence the record
- * itself, which turns the inbox into a thing you cannot trust.
- * 
- * Every column defaults to `true`, and an absent row reads as all-true, so a
- * person who never opens the settings screen gets the same behaviour as one who
- * opened it and changed nothing.
  */
 export type NotificationPreferenceModel = runtime.Types.Result.DefaultSelection<Prisma.$NotificationPreferencePayload>
 

@@ -14,9 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 
 /**
  * Model Label
- * Organization-scoped, not per-project, so a label means the same thing on
- * every board. That is the whole point of it: "blocked-on-design" filed under
- * two projects with two different ids is two labels that merely look alike.
+ * 
  */
 export type LabelModel = runtime.Types.Result.DefaultSelection<Prisma.$LabelPayload>
 
