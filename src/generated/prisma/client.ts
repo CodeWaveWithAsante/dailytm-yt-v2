@@ -46,3 +46,145 @@ export { Prisma }
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
+/**
+ * Model Account
+ * 
+ */
+export type Account = Prisma.AccountModel
+/**
+ * Model Verification
+ * 
+ */
+export type Verification = Prisma.VerificationModel
+/**
+ * Model TwoFactor
+ * 
+ */
+export type TwoFactor = Prisma.TwoFactorModel
+/**
+ * Model Organization
+ * 
+ */
+export type Organization = Prisma.OrganizationModel
+/**
+ * Model OrganizationWebhook
+ * 
+ */
+export type OrganizationWebhook = Prisma.OrganizationWebhookModel
+/**
+ * Model Member
+ * 
+ */
+export type Member = Prisma.MemberModel
+/**
+ * Model Invitation
+ * 
+ */
+export type Invitation = Prisma.InvitationModel
+/**
+ * Model Entitlement
+ * 
+ */
+export type Entitlement = Prisma.EntitlementModel
+/**
+ * Model ActivityEvent
+ * 
+ */
+export type ActivityEvent = Prisma.ActivityEventModel
+/**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
+ * Model ProjectMember
+ * Rows exist only for `RESTRICTED` projects.
+ */
+export type ProjectMember = Prisma.ProjectMemberModel
+/**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel
+/**
+ * Model WorkflowStatus
+ * 
+ */
+export type WorkflowStatus = Prisma.WorkflowStatusModel
+/**
+ * Model Label
+ * Organization-scoped, not per-project, so a label means the same thing on
+ * every board. That is the whole point of it: "blocked-on-design" filed under
+ * two projects with two different ids is two labels that merely look alike.
+ */
+export type Label = Prisma.LabelModel
+/**
+ * Model TaskLabel
+ * A pure join. Composite primary key rather than a surrogate id: nothing ever
+ * refers to one of these rows by id, and a uuid column on a join table is a
+ * second btree paid for on every tag and untag.
+ */
+export type TaskLabel = Prisma.TaskLabelModel
+/**
+ * Model Comment
+ * 
+ */
+export type Comment = Prisma.CommentModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model NotificationPreference
+ * One row per person per organization, written the first time somebody changes
+ * one — never on a read, because the settings screen is opened far less often
+ * than the pages that consult it and a read-through insert would put a write
+ * on the path of every notification.
+ * 
+ * Only email is configurable. The inbox always records everything, so the row
+ * is a complete history of what happened to you and a muted channel cannot
+ * erase it — a type × channel matrix would let someone silence the record
+ * itself, which turns the inbox into a thing you cannot trust.
+ * 
+ * Every column defaults to `true`, and an absent row reads as all-true, so a
+ * person who never opens the settings screen gets the same behaviour as one who
+ * opened it and changed nothing.
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model Attachment
+ * A file on a task.
+ * 
+ * Keyed by **object key**, never a URL: a stored URL cannot be re-signed and
+ * does not survive a bucket move. Every URL this app serves is minted on demand
+ * and expires in minutes — docs/ARCHITECTURE.md, "Storage is provider-neutral".
+ */
+export type Attachment = Prisma.AttachmentModel
+/**
+ * Model Subscription
+ * A Polar subscription, mirrored so the app never asks Polar anything.
+ * 
+ * It is a mirror, not an authority: `Entitlement` is what the application reads
+ * for limits, and this row exists to show a person what they are paying for and
+ * to give the webhook something to reconcile against. See
+ * docs/ARCHITECTURE.md, "Entitlements are the only limit authority".
+ */
+export type Subscription = Prisma.SubscriptionModel
+/**
+ * Model WebhookEvent
+ * One row per webhook event id. The whole of webhook idempotency.
+ * 
+ * Same shape as Phase 3's reminder dedupe and the same argument: "replaying an
+ * event produces one state change" is a database property or it is a race. The
+ * handler inserts here first and returns on a unique violation.
+ * 
+ * `id` is the provider's event id, so it takes no `@default` — and no foreign
+ * key anywhere, because this table describes messages rather than tenants.
+ */
+export type WebhookEvent = Prisma.WebhookEventModel
