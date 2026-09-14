@@ -22,3 +22,113 @@ export * from './enums';
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
+/**
+ * Model Account
+ * 
+ */
+export type Account = Prisma.AccountModel
+/**
+ * Model Verification
+ * 
+ */
+export type Verification = Prisma.VerificationModel
+/**
+ * Model TwoFactor
+ * 
+ */
+export type TwoFactor = Prisma.TwoFactorModel
+/**
+ * Model Organization
+ * 
+ */
+export type Organization = Prisma.OrganizationModel
+/**
+ * Model OrganizationWebhook
+ * 
+ */
+export type OrganizationWebhook = Prisma.OrganizationWebhookModel
+/**
+ * Model Member
+ * 
+ */
+export type Member = Prisma.MemberModel
+/**
+ * Model Invitation
+ * 
+ */
+export type Invitation = Prisma.InvitationModel
+/**
+ * Model Entitlement
+ * 
+ */
+export type Entitlement = Prisma.EntitlementModel
+/**
+ * Model ActivityEvent
+ * 
+ */
+export type ActivityEvent = Prisma.ActivityEventModel
+/**
+ * Model Project
+ * 
+ */
+export type Project = Prisma.ProjectModel
+/**
+ * Model ProjectMember
+ * 
+ */
+export type ProjectMember = Prisma.ProjectMemberModel
+/**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel
+/**
+ * Model WorkflowStatus
+ * 
+ */
+export type WorkflowStatus = Prisma.WorkflowStatusModel
+/**
+ * Model Label
+ * 
+ */
+export type Label = Prisma.LabelModel
+/**
+ * Model TaskLabel
+ * 
+ */
+export type TaskLabel = Prisma.TaskLabelModel
+/**
+ * Model Comment
+ * 
+ */
+export type Comment = Prisma.CommentModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model NotificationPreference
+ * 
+ */
+export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model Attachment
+ * 
+ */
+export type Attachment = Prisma.AttachmentModel
+/**
+ * Model Subscription
+ * 
+ */
+export type Subscription = Prisma.SubscriptionModel
+/**
+ * Model WebhookEvent
+ * 
+ */
+export type WebhookEvent = Prisma.WebhookEventModel
