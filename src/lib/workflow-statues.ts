@@ -1,5 +1,5 @@
 import { StatusCategory } from "@/generated/prisma/enums";
-import { TokenColor } from "./toekm-colors";
+import { TokenColor } from "./token-colors";
 
 export const DEFAULT_WORKFLOW_STATUSES: readonly {
   name: string;

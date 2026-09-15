@@ -3,8 +3,6 @@ import "server-only";
 import db from "@/lib/db";
 import { ProtectedContext } from "@/lib/validations/auth";
 import { TRPCError } from "@trpc/server";
-import { create } from "domain";
-import { member } from "@/lib/permissions";
 
 export type OrganizationSummary = {
   id: string;

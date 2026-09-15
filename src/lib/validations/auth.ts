@@ -1,5 +1,6 @@
 import z from "zod";
 import { Session } from "../auth";
+import { ProjectVisibility } from "@/generated/prisma/enums";
 
 const password = z
   .string()
@@ -78,3 +79,21 @@ export function slugify(value: string): string {
       .slice(0, 48)
   );
 }
+
+export type ProjectContext = OrgContext & {
+  project: {
+    id: string;
+    visibility: ProjectVisibility;
+    archivedAt: Date | null;
+  };
+};
+
+export type TaskContext = ProjectContext & {
+  task: {
+    id: string;
+    projectId: string;
+    statusId: string;
+    parentId: string | null;
+    rank: string;
+  };
+};
