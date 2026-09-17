@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 import {
   createTRPCRouter,
   orgProcedure,
@@ -7,12 +7,12 @@ import {
   projectProcedure,
 } from "../init";
 
-import * as projectService from "@/server/services/project.service";
 import {
   createProjectInput,
   setProjectArchivedInput,
   updateProjectInput,
-} from "@/lib/validations/ptoject";
+} from "@/lib/validations/project";
+import * as projectService from "@/server/services/project.service";
 
 export const projectRouter = createTRPCRouter({
   list: orgProcedure
