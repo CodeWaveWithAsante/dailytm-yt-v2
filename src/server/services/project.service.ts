@@ -250,7 +250,7 @@ export async function listMembers(
     role: row.member.role,
     name: row.member.user.name,
     email: row.member.user.email,
-    image: row.member.user,
+    image: row.member.user.image,
   }));
 }
 
