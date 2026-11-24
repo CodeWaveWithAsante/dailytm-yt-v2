@@ -138,3 +138,29 @@ export const reorderStatusesInput = z.object({
   /** Every column on the board, in the order it should now appear. */
   statusIds: z.array(z.string().min(1)).min(1).max(20),
 });
+
+/** `undefined` leaves a field alone; `null` clears it. */
+export const updateTaskInput = z
+  .object({
+    title: taskTitle.optional(),
+    description: taskDescription,
+    statusId: z.string().min(1).optional(),
+    priority: z.enum(TaskPriority).optional(),
+    assigneeId: z.string().min(1).nullish(),
+    startDate: z.date().nullish(),
+    dueDate: z.date().nullish(),
+  })
+  .refine(
+    (input) => Object.values(input).some((value) => value !== undefined),
+    { message: "Nothing to update" },
+  );
+
+/**
+ * Neighbours by id, not a rank: the server mints the key between whatever
+ * those two rows hold *now*, so a stale client cannot write an out-of-order rank.
+ */
+export const moveTaskInput = z.object({
+  statusId: z.string().min(1),
+  beforeId: z.string().min(1).nullish(),
+  afterId: z.string().min(1).nullish(),
+});

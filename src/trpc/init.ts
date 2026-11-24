@@ -95,3 +95,10 @@ export function permittedProjectProcedure(request: PermissionRequest) {
     return next();
   });
 }
+
+export function permittedTaskProcedure(request: PermissionRequest) {
+  return taskProcedure.use(({ ctx, next }) => {
+    assertPermission(ctx.role, request);
+    return next();
+  });
+}

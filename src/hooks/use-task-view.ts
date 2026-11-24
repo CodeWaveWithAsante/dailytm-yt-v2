@@ -6,6 +6,8 @@ import { useQueryStates } from "nuqs";
 export function useTaskViewState() {
   return useQueryStates(taskViewParser, {
     history: "replace",
-    shallow: false,
+    // Filters and the open task are client state; the queries refetch on
+    // their own, so a server round trip per click buys nothing.
+    shallow: true,
   });
 }
