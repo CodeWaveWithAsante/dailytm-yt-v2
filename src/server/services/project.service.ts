@@ -1,4 +1,3 @@
-import { InputGroupText } from "@/components/ui/input-group";
 import { Prisma, ProjectVisibility } from "@/generated/prisma/client";
 import { ActivityType } from "@/lib/activity-types";
 import db from "@/lib/db";
@@ -46,7 +45,7 @@ export const projectSelect = {
 } satisfies Prisma.ProjectSelect;
 
 export async function list(ctx: OrgContext, input: ListProjectsInput = {}) {
-  const limit = Math.min(input?.limit ?? DEFAULT_LIMIT);
+  const limit = Math.min(input.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
 
   const rows = await db.project.findMany({
     where: {
@@ -69,10 +68,26 @@ export async function list(ctx: OrgContext, input: ListProjectsInput = {}) {
   const hasMore = rows.length > limit;
   const items = hasMore ? rows.slice(0, limit) : rows;
 
+  // One grouped query for the progress bars, not one count per project.
+  const done = await db.task.groupBy({
+    by: ["projectId"],
+    where: {
+      organizationId: ctx.orgId,
+      projectId: { in: items.map((row) => row.id) },
+      archivedAt: null,
+      status: { category: "DONE" },
+    },
+    _count: { _all: true },
+  });
+  const doneByProject = new Map(
+    done.map((row) => [row.projectId, row._count._all]),
+  );
+
   return {
     items: items.map(({ _count, ...project }) => ({
       ...project,
       taskCount: _count,
+      doneCount: doneByProject.get(project.id) ?? 0,
     })),
     nextCursor: hasMore ? (items.at(-1)?.id ?? null) : null,
   };
