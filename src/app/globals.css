@@ -182,7 +182,7 @@
      reads as ordered rather than as five unrelated colours. */
   --chart-1: oklch(0.545 0.16 277);
   --chart-2: oklch(0.6 0.14 227);
-  --chart-3: oklch(0.65 0.12 172);
+  --chart-3: oklch(0.6 0.12 172);
   --chart-4: oklch(0.7 0.14 75);
   --chart-5: oklch(0.57 0.17 340);
 
@@ -293,7 +293,7 @@
 
   --chart-1: oklch(0.66 0.15 277);
   --chart-2: oklch(0.7 0.13 227);
-  --chart-3: oklch(0.74 0.11 172);
+  --chart-3: oklch(0.67 0.11 172);
   --chart-4: oklch(0.81 0.14 82);
   --chart-5: oklch(0.68 0.16 340);
 
