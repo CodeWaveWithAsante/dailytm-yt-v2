@@ -5,7 +5,7 @@ import {
   parseAsArrayOf,
   parseAsString,
   parseAsStringLiteral,
-} from "nuqs";
+} from "nuqs/server";
 
 export const TASK_VIEWS = ["board", "list", "calendar"] as const;
 export type TaskView = (typeof TASK_VIEWS)[number];
