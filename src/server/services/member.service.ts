@@ -40,7 +40,6 @@ export async function list(ctx: OrgContext, input: ListMembersInput = {}) {
           name: true,
           email: true,
           image: true,
-          avatarKey: true,
         },
       },
     },
@@ -62,7 +61,7 @@ export async function list(ctx: OrgContext, input: ListMembersInput = {}) {
       userId: member.userId,
       name: member.user.name,
       email: member.user.email,
-      image: member.user,
+      image: member.user.image,
       /** So the UI can mark "you" without a second source of truth. */
       isSelf: member.userId === ctx.userId,
     })),
@@ -86,7 +85,6 @@ export async function byId(ctx: OrgContext, input: { memberId: string }) {
           name: true,
           email: true,
           image: true,
-          avatarKey: true,
         },
       },
     },
@@ -103,7 +101,7 @@ export async function byId(ctx: OrgContext, input: { memberId: string }) {
     userId: member.userId,
     name: member.user.name,
     email: member.user.email,
-    image: member.user,
+    image: member.user.image,
     isSelf: member.userId === ctx.userId,
   };
 }

@@ -63,8 +63,8 @@ export function AssigneeSelect({
           {selected ? (
             <>
               <AssigneeAvatar
-                name={selected.name!}
-                image={selected.image.image!}
+                name={selected.name ?? selected.email}
+                image={selected.image}
                 className="size-5"
               />
               <span className="truncate">{selected.name}</span>
@@ -141,8 +141,8 @@ export function AssigneeSelect({
                       onSelect={() => choose(member.id)}
                     >
                       <AssigneeAvatar
-                        name={member.name!}
-                        image={null}
+                        name={member.name ?? member.email}
+                        image={member.image}
                         className="size-5"
                       />
                       <span className="min-w-0 flex-1 truncate">

@@ -276,7 +276,7 @@ export async function list(ctx: OrgContext, input: ListTasksInput = {}) {
     ...(input.labelIds?.length
       ? { labels: { some: { labelId: { in: input.labelIds } } } }
       : {}),
-    // ...(input.priority?.length ? { priority: { in: input.priority } } : {}),
+    ...(input.priority?.length ? { priority: { in: input.priority } } : {}),
     ...assigneeFilter,
     ...(input.query
       ? { title: { contains: input.query, mode: "insensitive" } }
