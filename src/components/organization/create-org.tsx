@@ -6,8 +6,8 @@ import {
   slugify,
 } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { organization } from "better-auth/plugins";
 import React from "react";
+import { Spinner } from "../ui/spinner";
 import { Controller, useForm } from "react-hook-form";
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
@@ -61,17 +61,17 @@ export const NewOrganization = ({ defaultName }: { defaultName: string }) => {
 
   return (
     <form
+      noValidate
       onSubmit={form.handleSubmit(handleSubmit)}
-
-      className="space-y-4"
+      className="space-y-5"
     >
       <Controller
         name="name"
         control={form.control}
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel>Your name</FieldLabel>
-            <Input {...field} type="text" />
+            <FieldLabel htmlFor="org-owner-name">Your name</FieldLabel>
+            <Input {...field} id="org-owner-name" autoComplete="name" />
             {fieldState.error && <FieldError errors={[fieldState.error]} />}
           </Field>
         )}
@@ -81,8 +81,14 @@ export const NewOrganization = ({ defaultName }: { defaultName: string }) => {
         control={form.control}
         render={({ field, fieldState }) => (
           <Field>
-            <FieldLabel>Organization name</FieldLabel>
-            <Input {...field} type="text" autoFocus placeholder="Acme Inc." />
+            <FieldLabel htmlFor="org-name">Organization name</FieldLabel>
+            <Input
+              {...field}
+              id="org-name"
+              autoFocus
+              placeholder="Acme Inc."
+              aria-describedby="organization-hint"
+            />
             {fieldState.error ? (
               <FieldError errors={[fieldState.error]} />
             ) : (
@@ -99,8 +105,9 @@ export const NewOrganization = ({ defaultName }: { defaultName: string }) => {
         )}
       />
 
-      <Button type="submit" disabled={submitting} className="w-full">
-        {submitting ? "Creating..." : "Create organization"}
+      <Button type="submit" disabled={submitting} className="h-10 w-full">
+        {submitting ? <Spinner className="size-4" /> : null}
+        {submitting ? "Creating workspace…" : "Create organization"}
       </Button>
     </form>
   );

@@ -1,10 +1,18 @@
+import type { Metadata } from "next";
 import { SignUpForm } from "@/components/auth/sign-up-form";
-import { redirectIfSignedIn } from "@/lib/authentication";
+import {
+  redirectIfSignedIn,
+  safeNext,
+  socialProviders,
+} from "@/lib/authentication";
 
-const SignUpPage = async () => {
-  await redirectIfSignedIn();
+export const metadata: Metadata = { title: "Create account · DailyTM" };
 
-  return <SignUpForm />;
+const SignUpPage = async ({ searchParams }: PageProps<"/sign-up">) => {
+  const { next } = await searchParams;
+  await redirectIfSignedIn(next);
+
+  return <SignUpForm next={safeNext(next)} providers={socialProviders()} />;
 };
 
 export default SignUpPage;

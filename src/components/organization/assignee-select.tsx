@@ -58,7 +58,7 @@ export function AssigneeSelect({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="w-full justify-start gap-2 px-3 font-normal"
+          className="h-10 w-full justify-start gap-2 px-3 font-normal"
         >
           {selected ? (
             <>

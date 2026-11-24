@@ -220,7 +220,10 @@ export function Landing({ signedIn }: { signedIn: boolean }) {
               title="From sign-up to shipping in three steps"
             />
 
-            <ol data-reveal className="relative mt-16 grid gap-10 md:grid-cols-3">
+            <ol
+              data-reveal
+              className="relative mt-16 grid gap-10 md:grid-cols-3"
+            >
               <span
                 aria-hidden
                 className="draw-line via-primary/60 absolute top-5 right-[16%] left-[16%] hidden h-px bg-linear-to-r from-transparent to-transparent md:block"
@@ -297,10 +300,16 @@ export function Landing({ signedIn }: { signedIn: boolean }) {
           <Logo className="text-foreground" />
           <p>© {new Date().getFullYear()} DailyTM. Plan the day.</p>
           <nav aria-label="Footer" className="flex gap-5">
-            <Link className="hover:text-foreground transition-colors" href="/sign-in">
+            <Link
+              className="hover:text-foreground transition-colors"
+              href="/sign-in"
+            >
               Sign in
             </Link>
-            <Link className="hover:text-foreground transition-colors" href="/sign-up">
+            <Link
+              className="hover:text-foreground transition-colors"
+              href="/sign-up"
+            >
               Create account
             </Link>
           </nav>
@@ -319,10 +328,16 @@ function Nav({ signedIn }: { signedIn: boolean }) {
           aria-label="Primary"
           className="text-muted-foreground hidden items-center gap-6 text-sm md:flex"
         >
-          <a href="#features" className="hover:text-foreground transition-colors">
+          <a
+            href="#features"
+            className="hover:text-foreground transition-colors"
+          >
             Features
           </a>
-          <a href="#workflow" className="hover:text-foreground transition-colors">
+          <a
+            href="#workflow"
+            className="hover:text-foreground transition-colors"
+          >
             How it works
           </a>
         </nav>
@@ -333,7 +348,12 @@ function Nav({ signedIn }: { signedIn: boolean }) {
           </Button>
         ) : (
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            >
               <Link href="/sign-in">Sign in</Link>
             </Button>
             <Button asChild size="sm">
@@ -420,12 +440,48 @@ function FeatureCard({
    tokens, and costs no image bytes. Purely decorative, so hidden from AT. */
 
 const MOCK_ROWS = [
-  { title: "Finalize launch checklist", status: "progress", pri: 3, due: "Today", who: "AK" },
-  { title: "Review onboarding copy", status: "progress", pri: 2, due: "Nov 26", who: "MJ" },
-  { title: "Migrate billing webhooks", status: "todo", pri: 3, due: "Nov 28", who: "SR" },
-  { title: "Design empty states", status: "todo", pri: 1, due: "Dec 2", who: "LT" },
-  { title: "Write release notes", status: "todo", pri: 2, due: "Dec 3", who: "AK" },
-  { title: "Set up status page", status: "done", pri: 1, due: "Nov 20", who: "MJ" },
+  {
+    title: "Finalize launch checklist",
+    status: "progress",
+    pri: 3,
+    due: "Today",
+    who: "AK",
+  },
+  {
+    title: "Review onboarding copy",
+    status: "progress",
+    pri: 2,
+    due: "Nov 26",
+    who: "MJ",
+  },
+  {
+    title: "Migrate billing webhooks",
+    status: "todo",
+    pri: 3,
+    due: "Nov 28",
+    who: "SR",
+  },
+  {
+    title: "Design empty states",
+    status: "todo",
+    pri: 1,
+    due: "Dec 2",
+    who: "LT",
+  },
+  {
+    title: "Write release notes",
+    status: "todo",
+    pri: 2,
+    due: "Dec 3",
+    who: "AK",
+  },
+  {
+    title: "Set up status page",
+    status: "done",
+    pri: 1,
+    due: "Nov 20",
+    who: "MJ",
+  },
 ] as const;
 
 function StatusIcon({ status }: { status: "todo" | "progress" | "done" }) {
@@ -479,7 +535,9 @@ function ProductMock() {
               key={label}
               className={cn(
                 "flex items-center gap-2 rounded-md px-2 py-1.5",
-                active ? "bg-sidebar-accent text-foreground" : "text-muted-foreground",
+                active
+                  ? "bg-sidebar-accent text-foreground"
+                  : "text-muted-foreground",
               )}
             >
               <Icon className="size-3.5" />
@@ -494,7 +552,10 @@ function ProductMock() {
             ["bg-project-teal", "Mobile app"],
             ["bg-project-rose", "Q1 marketing"],
           ].map(([color, name]) => (
-            <span key={name} className="text-muted-foreground flex items-center gap-2 px-2 py-1">
+            <span
+              key={name}
+              className="text-muted-foreground flex items-center gap-2 px-2 py-1"
+            >
               <span className={cn("size-2 rounded-sm", color)} />
               {name}
             </span>
@@ -509,8 +570,12 @@ function ProductMock() {
             </span>
             <span className="font-medium">Website relaunch</span>
             <span className="bg-muted ml-2 hidden rounded-md p-0.5 sm:flex">
-              <span className="text-muted-foreground rounded px-2 py-0.5">Board</span>
-              <span className="bg-background rounded px-2 py-0.5 shadow-xs">List</span>
+              <span className="text-muted-foreground rounded px-2 py-0.5">
+                Board
+              </span>
+              <span className="bg-background rounded px-2 py-0.5 shadow-xs">
+                List
+              </span>
             </span>
             <span className="flex-1" />
             <span className="bg-primary text-primary-foreground rounded-md px-2 py-1 text-[11px] font-medium">
@@ -520,12 +585,18 @@ function ProductMock() {
 
           {(["progress", "todo", "done"] as const).map((group) => {
             const rows = MOCK_ROWS.filter((row) => row.status === group);
-            const label = { progress: "In progress", todo: "Todo", done: "Done" }[group];
+            const label = {
+              progress: "In progress",
+              todo: "Todo",
+              done: "Done",
+            }[group];
             return (
               <div key={group}>
                 <div className="bg-muted/40 text-muted-foreground border-border flex items-center gap-2 border-b px-4 py-1.5 text-[11px]">
                   <StatusIcon status={group} />
-                  <span className="text-foreground/90 font-medium">{label}</span>
+                  <span className="text-foreground/90 font-medium">
+                    {label}
+                  </span>
                   <span className="tabular-nums">{rows.length}</span>
                 </div>
                 {rows.map((row, index) => (
@@ -538,7 +609,11 @@ function ProductMock() {
                   >
                     <span
                       className={cn(
-                        row.pri === 3 ? "text-warning" : row.pri === 2 ? "text-info" : "text-muted-foreground",
+                        row.pri === 3
+                          ? "text-warning"
+                          : row.pri === 2
+                            ? "text-info"
+                            : "text-muted-foreground",
                       )}
                     >
                       <Bars level={row.pri} />
@@ -555,7 +630,8 @@ function ProductMock() {
                     <span
                       className={cn(
                         "min-w-0 flex-1 truncate",
-                        group === "done" && "text-muted-foreground line-through decoration-1",
+                        group === "done" &&
+                          "text-muted-foreground line-through decoration-1",
                       )}
                     >
                       {row.title}
@@ -563,7 +639,9 @@ function ProductMock() {
                     <span
                       className={cn(
                         "hidden items-center gap-1 text-[11px] sm:flex",
-                        row.due === "Today" ? "text-warning" : "text-muted-foreground",
+                        row.due === "Today"
+                          ? "text-warning"
+                          : "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="size-3" />
@@ -580,12 +658,17 @@ function ProductMock() {
 
           {/* Details sheet peeking in */}
           <div className="border-border bg-popover absolute top-14 right-3 bottom-3 hidden w-64 flex-col gap-3 rounded-lg border p-4 shadow-2xl lg:flex">
-            <span className="text-muted-foreground text-[11px]">Website relaunch</span>
-            <span className="text-sm font-medium">Finalize launch checklist</span>
+            <span className="text-muted-foreground text-[11px]">
+              Website relaunch
+            </span>
+            <span className="text-sm font-medium">
+              Finalize launch checklist
+            </span>
             <div className="grid grid-cols-[5rem_1fr] gap-y-2.5 text-[12px]">
               <span className="text-muted-foreground">Status</span>
               <span className="flex items-center gap-1.5">
-                <CircleDotIcon className="text-project-amber size-3.5" /> In progress
+                <CircleDotIcon className="text-project-amber size-3.5" /> In
+                progress
               </span>
               <span className="text-muted-foreground">Priority</span>
               <span className="text-warning flex items-center gap-1.5">
@@ -601,18 +684,27 @@ function ProductMock() {
               Walk the checklist with design and QA, then flip the DNS.
             </span>
             <div className="mt-auto space-y-1.5">
-              {["QA sign-off", "Copy review", "DNS cut-over"].map((item, index) => (
-                <span key={item} className="flex items-center gap-2 text-[12px]">
-                  {index < 2 ? (
-                    <CheckIcon className="text-success size-3.5" />
-                  ) : (
-                    <CircleDashedIcon className="text-muted-foreground size-3.5" />
-                  )}
-                  <span className={index < 2 ? "text-muted-foreground line-through" : ""}>
-                    {item}
+              {["QA sign-off", "Copy review", "DNS cut-over"].map(
+                (item, index) => (
+                  <span
+                    key={item}
+                    className="flex items-center gap-2 text-[12px]"
+                  >
+                    {index < 2 ? (
+                      <CheckIcon className="text-success size-3.5" />
+                    ) : (
+                      <CircleDashedIcon className="text-muted-foreground size-3.5" />
+                    )}
+                    <span
+                      className={
+                        index < 2 ? "text-muted-foreground line-through" : ""
+                      }
+                    >
+                      {item}
+                    </span>
                   </span>
-                </span>
-              ))}
+                ),
+              )}
             </div>
           </div>
 
@@ -627,8 +719,16 @@ function ProductMock() {
 
 function MiniBoard() {
   const columns = [
-    { name: "Todo", color: "bg-project-slate", cards: ["Audit nav links", "Pricing FAQ"] },
-    { name: "In progress", color: "bg-project-amber", cards: ["Hero animation", "Signup flow"] },
+    {
+      name: "Todo",
+      color: "bg-project-slate",
+      cards: ["Audit nav links", "Pricing FAQ"],
+    },
+    {
+      name: "In progress",
+      color: "bg-project-amber",
+      cards: ["Hero animation", "Signup flow"],
+    },
     { name: "Review", color: "bg-project-violet", cards: ["Footer links"] },
     { name: "Done", color: "bg-project-green", cards: ["Brand colours"] },
   ];
@@ -667,7 +767,11 @@ function MiniSheet() {
     <div className="relative h-full w-full max-w-64">
       <div className="border-border bg-muted/30 absolute inset-x-0 top-4 space-y-2 rounded-lg border p-3">
         {[1, 2, 3].map((row) => (
-          <div key={row} className="bg-muted h-2 rounded-full" style={{ width: `${90 - row * 15}%` }} />
+          <div
+            key={row}
+            className="bg-muted h-2 rounded-full"
+            style={{ width: `${90 - row * 15}%` }}
+          />
         ))}
       </div>
       <div className="border-border bg-popover absolute top-0 right-0 bottom-0 w-3/5 translate-x-4 space-y-2.5 rounded-lg border p-3 shadow-xl transition-transform duration-(--duration-slow) ease-(--ease-out-quart) group-hover:translate-x-0">
@@ -700,7 +804,12 @@ function MiniRoles() {
           className="border-border bg-card flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 text-xs transition-transform duration-(--duration-normal) group-hover:translate-x-1"
           style={{ transitionDelay: `${index * 40}ms` }}
         >
-          <span className={cn("grid size-5 place-items-center rounded-full text-[9px] font-medium text-white", color)}>
+          <span
+            className={cn(
+              "grid size-5 place-items-center rounded-full text-[9px] font-medium text-white",
+              color,
+            )}
+          >
             {who}
           </span>
           <span className="flex-1">{role}</span>
@@ -718,14 +827,18 @@ function MiniVisibility() {
         <GlobeIcon className="text-project-teal size-4" />
         <span className="flex-1">
           Open
-          <span className="text-muted-foreground block text-[10px]">Everyone in the org</span>
+          <span className="text-muted-foreground block text-[10px]">
+            Everyone in the org
+          </span>
         </span>
       </div>
       <div className="border-primary/40 bg-card flex items-center gap-2.5 rounded-lg border p-2.5 text-xs shadow-[0_0_0_4px_oklch(0.55_0.16_277/0.12)]">
         <LockIcon className="text-accent-foreground size-4 transition-transform duration-(--duration-normal) group-hover:-rotate-12" />
         <span className="flex-1">
           Restricted
-          <span className="text-muted-foreground block text-[10px]">Only people you add</span>
+          <span className="text-muted-foreground block text-[10px]">
+            Only people you add
+          </span>
         </span>
         <CheckIcon className="text-accent-foreground size-3.5" />
       </div>
@@ -737,7 +850,10 @@ function MiniChart() {
   const points = [8, 12, 10, 16, 14, 22, 19, 26, 24, 31];
   const max = 34;
   const path = points
-    .map((value, index) => `${index === 0 ? "M" : "L"}${(index / (points.length - 1)) * 200},${80 - (value / max) * 80}`)
+    .map(
+      (value, index) =>
+        `${index === 0 ? "M" : "L"}${(index / (points.length - 1)) * 200},${80 - (value / max) * 80}`,
+    )
     .join(" ");
   return (
     <div className="w-full max-w-60">
@@ -753,7 +869,13 @@ function MiniChart() {
           </linearGradient>
         </defs>
         <path d={`${path} L200,80 L0,80 Z`} fill="url(#mini-area)" />
-        <path d={path} fill="none" stroke="var(--chart-1)" strokeWidth="2" strokeLinejoin="round" />
+        <path
+          d={path}
+          fill="none"
+          stroke="var(--chart-1)"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
       </svg>
     </div>
   );

@@ -47,7 +47,7 @@ export function DateField({
               // `min-w-0 flex-1`, not `w-full`: the Button base is `shrink-0`, so a
               // `w-full` trigger claimed the whole row and pushed the clear
               // button — and the panel — 40px wide. The row scrolled sideways.
-              "min-w-0 flex-1 justify-start gap-2 px-3 font-normal",
+              "h-10 min-w-0 flex-1 justify-start gap-2 px-3 font-normal",
               !value && "text-muted-foreground",
             )}
           >
@@ -78,7 +78,7 @@ export function DateField({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-9 shrink-0"
+          className="size-10 shrink-0"
           disabled={disabled}
           onClick={() => onChange(null)}
           aria-label={`Clear ${label.toLowerCase()}`}
