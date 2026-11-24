@@ -276,7 +276,7 @@ export async function list(ctx: OrgContext, input: ListTasksInput = {}) {
     ...(input.labelIds?.length
       ? { labels: { some: { labelId: { in: input.labelIds } } } }
       : {}),
-    // ...(input.priority?.length ? { priority: { in: input.priority } } : {}),
+    ...(input.priority?.length ? { priority: { in: input.priority } } : {}),
     ...assigneeFilter,
     ...(input.query
       ? { title: { contains: input.query, mode: "insensitive" } }
@@ -568,4 +568,162 @@ export async function remove(ctx: OrgContext, input: { taskId: string }) {
   await db.task.delete({ where: { id: input.taskId } });
 
   return { id: task.id };
+}
+
+async function bottomRank(orgId: string, projectId: string, statusId: string) {
+  const last = await db.task.findFirst({
+    where: { organizationId: orgId, projectId, statusId, archivedAt: null },
+    orderBy: { rank: "desc" },
+    select: { rank: true },
+  });
+  return rankBetween(last?.rank ?? null, null);
+}
+
+/** Done → done keeps the original timestamp; leaving done clears it. */
+function completedAtFor(
+  from: StatusCategory,
+  to: StatusCategory,
+): Date | null | undefined {
+  if (!isDoneCategory(to)) return null;
+  return isDoneCategory(from) ? undefined : new Date();
+}
+
+async function withCounts(ctx: OrgContext, row: TaskRow) {
+  const counts =
+    row.parentId === null
+      ? await subtaskCounts(ctx.orgId, [row.id])
+      : undefined;
+  return toSummary(row, counts);
+}
+
+export type UpdateTaskInput = {
+  taskId: string;
+  title?: string;
+  description?: string | null;
+  statusId?: string;
+  priority?: TaskPriority;
+  assigneeId?: string | null;
+  startDate?: Date | null;
+  dueDate?: Date | null;
+};
+
+export async function update(ctx: OrgContext, input: UpdateTaskInput) {
+  const current = await readTask(ctx, input.taskId);
+  const data: Prisma.TaskUncheckedUpdateInput = {};
+
+  if (input.title !== undefined) data.title = input.title;
+  if (input.description !== undefined) {
+    data.description = input.description;
+    data.descriptionText = derivedText(input.description);
+  }
+  if (input.priority !== undefined) data.priority = input.priority;
+  if (input.startDate !== undefined) data.startDate = input.startDate;
+  if (input.dueDate !== undefined) data.dueDate = input.dueDate;
+  if (input.assigneeId !== undefined) {
+    if (input.assigneeId) await requireAssignee(ctx, input.assigneeId);
+    data.assigneeId = input.assigneeId;
+  }
+  if (input.statusId !== undefined && input.statusId !== current.statusId) {
+    const status = await requireStatus(ctx, current.projectId, input.statusId);
+    data.statusId = status.id;
+    // A status change from the sheet lands at the bottom of the new column.
+    data.rank = await bottomRank(ctx.orgId, current.projectId, status.id);
+    data.completedAt = completedAtFor(current.status.category, status.category);
+  }
+
+  const row = await db.$transaction(async (tx) => {
+    const updated = await tx.task.update({
+      where: { id: current.id },
+      data,
+      select: taskSelect,
+    });
+    await tx.activityEvent.create({
+      data: {
+        type: ActivityType.TASK_UPDATED,
+        organizationId: ctx.orgId,
+        actorId: ctx.userId,
+        projectId: current.projectId,
+        payload: {
+          taskId: current.id,
+          title: updated.title,
+          fields: Object.keys(data),
+        },
+      },
+    });
+    return updated;
+  });
+
+  return withCounts(ctx, row);
+}
+
+export async function move(
+  ctx: OrgContext,
+  input: {
+    taskId: string;
+    statusId: string;
+    beforeId?: string | null;
+    afterId?: string | null;
+  },
+) {
+  const current = await readTask(ctx, input.taskId);
+  const status = await requireStatus(ctx, current.projectId, input.statusId);
+
+  const ids = [input.beforeId, input.afterId].filter(
+    (id): id is string => Boolean(id) && id !== current.id,
+  );
+  const neighbours = ids.length
+    ? await db.task.findMany({
+        where: {
+          id: { in: ids },
+          organizationId: ctx.orgId,
+          projectId: current.projectId,
+          statusId: status.id,
+        },
+        select: { id: true, rank: true },
+      })
+    : [];
+  const before = neighbours.find((n) => n.id === input.beforeId)?.rank ?? null;
+  const after = neighbours.find((n) => n.id === input.afterId)?.rank ?? null;
+
+  let rank: string;
+  try {
+    rank =
+      before === null && after === null
+        ? await bottomRank(ctx.orgId, current.projectId, status.id)
+        : rankBetween(before, after);
+  } catch {
+    // Neighbours moved under us (or share a rank): append rather than fail.
+    rank = await bottomRank(ctx.orgId, current.projectId, status.id);
+  }
+
+  const row = await db.$transaction(async (tx) => {
+    const moved = await tx.task.update({
+      where: { id: current.id },
+      data: {
+        statusId: status.id,
+        rank,
+        completedAt: completedAtFor(current.status.category, status.category),
+      },
+      select: taskSelect,
+    });
+    if (status.id !== current.statusId) {
+      await tx.activityEvent.create({
+        data: {
+          type: ActivityType.TASK_MOVED,
+          organizationId: ctx.orgId,
+          actorId: ctx.userId,
+          projectId: current.projectId,
+          payload: {
+            taskId: current.id,
+            title: moved.title,
+            fromStatusId: current.statusId,
+            toStatusId: status.id,
+          },
+        },
+      });
+    }
+    return moved;
+  });
+
+  return withCounts(ctx, row);
 }

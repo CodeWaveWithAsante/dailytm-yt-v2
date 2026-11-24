@@ -1,20 +1,14 @@
-import { ClientGreeting } from "@/components/client-greeting";
-import db from "@/lib/db";
-import { HydrateClient } from "@/trpc/server";
-import Image from "next/image";
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
+import type { Metadata } from "next";
+import { Landing } from "@/components/marketing/landing";
+import { getSession } from "@/lib/authentication";
+
+export const metadata: Metadata = {
+  title: "DailyTM — Plan the day. Ship the work.",
+  description:
+    "The calm, fast task manager for individuals and teams. Custom workflows, boards and lists in sync, and a dashboard that shows what is slipping.",
+};
 
 export default async function Home() {
-  return (
-    <HydrateClient>
-      <div>...</div>
-      {/** ... */}
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <ClientGreeting />
-        </Suspense>
-      </ErrorBoundary>
-    </HydrateClient>
-  );
+  const session = await getSession();
+  return <Landing signedIn={Boolean(session?.user)} />;
 }

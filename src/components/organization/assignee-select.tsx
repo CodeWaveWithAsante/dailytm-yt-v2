@@ -58,13 +58,13 @@ export function AssigneeSelect({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="w-full justify-start gap-2 px-3 font-normal"
+          className="h-10 w-full justify-start gap-2 px-3 font-normal"
         >
           {selected ? (
             <>
               <AssigneeAvatar
-                name={selected.name!}
-                image={selected.image.image!}
+                name={selected.name ?? selected.email}
+                image={selected.image}
                 className="size-5"
               />
               <span className="truncate">{selected.name}</span>
@@ -141,8 +141,8 @@ export function AssigneeSelect({
                       onSelect={() => choose(member.id)}
                     >
                       <AssigneeAvatar
-                        name={member.name!}
-                        image={null}
+                        name={member.name ?? member.email}
+                        image={member.image}
                         className="size-5"
                       />
                       <span className="min-w-0 flex-1 truncate">

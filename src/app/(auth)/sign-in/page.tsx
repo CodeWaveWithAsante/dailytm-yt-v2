@@ -1,11 +1,18 @@
+import type { Metadata } from "next";
 import { SignInForm } from "@/components/auth/sign-in-form";
-import { redirectIfSignedIn } from "@/lib/authentication";
-import React from "react";
+import {
+  redirectIfSignedIn,
+  safeNext,
+  socialProviders,
+} from "@/lib/authentication";
 
-const SignInPage = async () => {
-  await redirectIfSignedIn();
+export const metadata: Metadata = { title: "Sign in · DailyTM" };
 
-  return <SignInForm />;
+const SignInPage = async ({ searchParams }: PageProps<"/sign-in">) => {
+  const { next } = await searchParams;
+  await redirectIfSignedIn(next);
+
+  return <SignInForm next={safeNext(next)} providers={socialProviders()} />;
 };
 
 export default SignInPage;

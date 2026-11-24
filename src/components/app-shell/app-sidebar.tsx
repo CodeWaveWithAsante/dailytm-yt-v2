@@ -1,32 +1,27 @@
 "use client";
 
 import { useTRPC } from "@/trpc/client";
-import {
-  CalendarDaysIcon,
-  CheckSquareIcon,
-  FolderKanbanIcon,
-  InboxIcon,
-  LayoutDashboardIcon,
-  SearchIcon,
-  SettingsIcon,
-} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { FolderKanbanIcon, LayoutDashboardIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
   SidebarRail,
-  SidebarSeparator,
 } from "../ui/sidebar";
 import Link from "next/link";
 import { OrgSwitcher } from "./org-switcher";
+import { UserMenu } from "./user-menu";
+import { ProjectGlyph } from "../project/project-client";
 
 export type OrganizationOption = {
   id: string;
@@ -48,6 +43,7 @@ type AppSidebarType = {
   orgSlug: string;
   user: ShellUser;
 };
+
 export const AppSidebar = ({
   activeOrgId,
   orgSlug,
@@ -56,9 +52,10 @@ export const AppSidebar = ({
 }: AppSidebarType) => {
   const pathname = usePathname();
   const trpc = useTRPC();
+  const projects = useQuery(trpc.project.list.queryOptions({ limit: 12 }));
 
-  // TODO: fetch projects
-
+  // ponytail: My Tasks / Calendar / Inbox / Settings links removed until those
+  // routes exist — they all 404'd.
   const items = [
     {
       href: `/${orgSlug}`,
@@ -67,19 +64,6 @@ export const AppSidebar = ({
       exact: true,
     },
     { href: `/${orgSlug}/projects`, label: "Projects", Icon: FolderKanbanIcon },
-    { href: `/${orgSlug}/my-tasks`, label: "My Tasks", Icon: CheckSquareIcon },
-    {
-      href: `/${orgSlug}/calendar`,
-      label: "Calendar",
-      Icon: CalendarDaysIcon,
-    },
-    {
-      href: `/${orgSlug}/inbox`,
-      label: "Inbox",
-      Icon: InboxIcon,
-      badge: 10,
-    },
-    { href: `/${orgSlug}/settings`, label: "Settings", Icon: SettingsIcon },
   ];
 
   const isActive = (href: string, exact = false) =>
@@ -95,53 +79,66 @@ export const AppSidebar = ({
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent className="bg-background">
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <SearchIcon aria-hidden />
-                  <span>Search</span>
-                  <kbd className="bg-sidebar-accent text-muted-foreground ml-auto rounded px-1.5 py-0.5 font-mono text-[10px] group-data-[collapsible=icon]:hidden">
-                    ⌘ K
-                  </kbd>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {items.map(({ href, label, Icon, badge, exact }) => (
+            <SidebarMenu>
+              {items.map(({ href, label, Icon, exact }) => (
                 <SidebarMenuItem key={href}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(href, exact)}
+                    tooltip={label}
+                  >
                     <Link href={href}>
-                      <Icon />
+                      <Icon aria-hidden />
                       <span>{label}</span>
                     </Link>
                   </SidebarMenuButton>
-
-                  {badge ? (
-                    <SidebarMenuBadge
-                      aria-label={`${badge} unread`}
-                      className="bg-destructive text-destructive-foreground"
-                    >
-                      {badge > 99 ? "99+" : badge}
-                    </SidebarMenuBadge>
-                  ) : null}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* PROJECTS */}
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel>Your projects</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {projects.isPending
+                ? Array.from({ length: 3 }, (_, index) => (
+                    <SidebarMenuItem key={index}>
+                      <SidebarMenuSkeleton showIcon />
+                    </SidebarMenuItem>
+                  ))
+                : projects.data?.items.map((project) => {
+                    const href = `/${orgSlug}/projects/${project.id}`;
+                    return (
+                      <SidebarMenuItem key={project.id}>
+                        <SidebarMenuButton
+                          asChild
+                          size="sm"
+                          isActive={isActive(href)}
+                        >
+                          <Link href={href}>
+                            <ProjectGlyph
+                              color={project.color}
+                              icon={project.icon}
+                              size="sm"
+                            />
+                            <span>{project.name}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <UserMenu user={user} />
+      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>

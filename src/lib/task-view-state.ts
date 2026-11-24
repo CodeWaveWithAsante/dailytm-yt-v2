@@ -5,7 +5,7 @@ import {
   parseAsArrayOf,
   parseAsString,
   parseAsStringLiteral,
-} from "nuqs";
+} from "nuqs/server";
 
 export const TASK_VIEWS = ["board", "list", "calendar"] as const;
 export type TaskView = (typeof TASK_VIEWS)[number];
@@ -98,3 +98,16 @@ export const TASK_PRIORITIES = [
   TaskPriority.HIGH,
   TaskPriority.CRITICAL,
 ] as const;
+
+/** The board reads a whole project in rank order, grouped client-side. */
+export const BOARD_LIMIT = 200;
+
+export function boardViewInput(projectId: string, state: TaskViewState) {
+  return {
+    ...filtersFromViewState(state),
+    projectId,
+    limit: BOARD_LIMIT,
+    sort: "rank" as const,
+    order: "asc" as const,
+  };
+}

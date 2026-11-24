@@ -2,22 +2,83 @@
 
 import { Suspense, useState } from "react";
 import { Button } from "../ui/button";
-import { LayoutGridIcon, ListIcon, PlusIcon } from "lucide-react";
-import { cn } from "cn";
+import {
+  LayoutGridIcon,
+  ListIcon,
+  PlusIcon,
+  type LucideIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import { parseAsBoolean, parseAsStringLiteral, useQueryState } from "nuqs";
-import { isRequestLike } from "better-auth";
 import { Switch } from "../ui/switch";
-import { ProjectClient } from "./project-client";
+import { ProjectClient, ProjectListSkeleton } from "./project-client";
 import { CreateProjectForm } from "./create-project-form";
 
 const PROJECT_VIEW = ["card", "list"] as const;
-type ProjectView = (typeof PROJECT_VIEW)[number];
 
-const VIEW_META: Record<ProjectView, { label: string; Icon: typeof ListIcon }> =
-  {
-    card: { label: "Card", Icon: LayoutGridIcon },
-    list: { label: "List", Icon: ListIcon },
-  };
+/**
+ * A two-or-three way segmented control. Radio semantics, so arrow keys move
+ * between options and a screen reader announces "Card, selected, 1 of 2".
+ */
+export function ViewToggle<T extends string>({
+  value,
+  options,
+  onChange,
+  label,
+}: {
+  value: T;
+  options: readonly { value: T; label: string; Icon: LucideIcon }[];
+  onChange: (value: T) => void;
+  label: string;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="bg-muted inline-flex shrink-0 items-center gap-0.5 rounded-lg p-0.5"
+      onKeyDown={(event) => {
+        if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+        event.preventDefault();
+        const index = options.findIndex((option) => option.value === value);
+        const step = event.key === "ArrowRight" ? 1 : -1;
+        const next = options[(index + step + options.length) % options.length];
+        onChange(next.value);
+        event.currentTarget
+          .querySelector<HTMLButtonElement>(`[data-value="${next.value}"]`)
+          ?.focus();
+      }}
+    >
+      {options.map(({ value: option, label: optionLabel, Icon }) => {
+        const active = option === value;
+        return (
+          <button
+            key={option}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            data-value={option}
+            tabIndex={active ? 0 : -1}
+            onClick={() => onChange(option)}
+            className={cn(
+              "focus-visible:ring-ring inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm transition-[color,background-color,box-shadow] duration-(--duration-fast) focus-visible:ring-2 focus-visible:outline-none",
+              active
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Icon className="size-4" aria-hidden />
+            <span>{optionLabel}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const VIEW_OPTIONS = [
+  { value: "card", label: "Cards", Icon: LayoutGridIcon },
+  { value: "list", label: "List", Icon: ListIcon },
+] as const;
 
 export const ProjectView = ({ orgSlug }: { orgSlug: string }) => {
   const [creating, setCreating] = useState(false);
@@ -36,52 +97,42 @@ export const ProjectView = ({ orgSlug }: { orgSlug: string }) => {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-5 pb-4">
-        <div className="bg-muted inline-flex shrink-0 items-center gap-0.5 rounded-lg p-0.5">
-          {PROJECT_VIEW.map((el) => {
-            const { label, Icon } = VIEW_META[el];
-            const isActive = view === el;
-
-            return (
-              <button
-                key={el}
-                type="button"
-                role="radio"
-                onClick={() => void setView(el)}
-                className={cn(
-                  "focus-visible:ring-ring inline-flex font-stretch-ultra-condensed gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none",
-                  isActive
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <Icon className="size-4" />
-                <span>{label}</span>
-              </button>
-            );
-          })}
+      <div className="mb-6 flex flex-wrap items-end gap-4">
+        <div className="mr-auto">
+          <h1 className="text-xl font-semibold tracking-[var(--tracking-heading)]">
+            Projects
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Every project in this workspace you can see.
+          </p>
         </div>
+
         <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm">
           <Switch
             checked={includeArchived}
             onCheckedChange={(check) => void setIncludeArchived(check)}
-          />{" "}
+          />
           Show archived
         </label>
 
-        <span className="flex-1" />
+        <ViewToggle
+          label="Project layout"
+          value={view}
+          options={VIEW_OPTIONS}
+          onChange={(next) => void setView(next)}
+        />
 
-        <Button size="sm" onClick={() => setCreating(true)}>
-          <PlusIcon className="size-4" />
-          New Project
+        <Button onClick={() => setCreating(true)} className="h-9">
+          <PlusIcon className="size-4" aria-hidden />
+          New project
         </Button>
       </div>
 
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<ProjectListSkeleton view={view} />}>
         <ProjectClient
           includeArchived={includeArchived}
           orgSlug={orgSlug}
-          onCreate={() => {}}
+          onCreate={() => setCreating(true)}
           view={view}
         />
       </Suspense>

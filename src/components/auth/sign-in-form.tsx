@@ -2,62 +2,131 @@
 
 import { SignInFormData, signInSchema } from "@/lib/validations/auth";
 import { useRouter } from "next/navigation";
-import React from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MailWarningIcon } from "lucide-react";
+import { toast } from "sonner";
+
+import { authClient } from "@/lib/auth-client";
 import { Field, FieldError, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
+import { AuthCard, AuthLink } from "./auth-card";
+import {
+  PasswordInput,
+  SocialButtons,
+  type SocialProviders,
+} from "./auth-fields";
 
-export const SignInForm = () => {
+export const SignInForm = ({
+  next,
+  providers,
+}: {
+  next: string;
+  providers: SocialProviders;
+}) => {
   const router = useRouter();
+  const [formError, setFormError] = useState<string | null>(null);
+  const [unverified, setUnverified] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+    defaultValues: { email: "", password: "" },
   });
   const submitting = form.formState.isSubmitting;
 
   const handleSubmit = async (data: SignInFormData) => {
+    setFormError(null);
+    setUnverified(null);
     await authClient.signIn.email(data, {
       onSuccess: () => {
-        router.push("/dashboard");
+        router.push(next);
+        router.refresh();
       },
-      onError: (error) => {
-        toast.error(
-          error.error.message || "An error occurred while signing in.",
-        );
+      onError: ({ error }) => {
+        if (error.code === "EMAIL_NOT_VERIFIED") {
+          setUnverified(data.email);
+          return;
+        }
+        setFormError(error.message || "We couldn't sign you in. Try again.");
       },
     });
   };
 
+  async function resend() {
+    if (!unverified) return;
+    setResending(true);
+    const { error } = await authClient.sendVerificationEmail({
+      email: unverified,
+      callbackURL: next,
+    });
+    setResending(false);
+    if (error) toast.error(error.message ?? "Could not send the email");
+    else toast.success(`Verification link sent to ${unverified}`);
+  }
+
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-foreground">Welcome Back</h1>
-      </div>
+    <AuthCard
+      title="Welcome back"
+      description="Sign in to pick up where you left off."
+      footer={
+        <>
+          New to DailyTM? <AuthLink href="/sign-up">Create an account</AuthLink>
+        </>
+      }
+    >
+      <SocialButtons providers={providers} callbackURL={next} />
+
+      {unverified ? (
+        <div
+          role="alert"
+          className="border-warning/40 bg-warning/10 mb-5 flex gap-3 rounded-lg border p-3 text-sm"
+        >
+          <MailWarningIcon
+            className="text-warning mt-0.5 size-4 shrink-0"
+            aria-hidden
+          />
+          <div className="space-y-2">
+            <p>
+              Verify <span className="font-medium">{unverified}</span> before
+              signing in. Check your inbox for the link.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={resending}
+              onClick={() => void resend()}
+            >
+              {resending ? <Spinner className="size-3.5" /> : null}
+              Resend verification email
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <form
+        noValidate
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-5"
       >
         <Controller
           name="email"
           control={form.control}
           render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Email</FieldLabel>
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 {...field}
+                id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="Enter your email"
+                placeholder="you@company.com"
                 autoFocus
+                aria-invalid={fieldState.invalid}
               />
               {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -67,34 +136,31 @@ export const SignInForm = () => {
           name="password"
           control={form.control}
           render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Password</FieldLabel>
-              <Input
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <PasswordInput
                 {...field}
-                type="password"
+                id="password"
                 autoComplete="current-password"
-                placeholder="Enter your password"
-                autoFocus
+                placeholder="Your password"
+                aria-invalid={fieldState.invalid}
               />
               {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
 
-        <Button type="submit" disabled={submitting}>
-          {submitting ? "Signing in..." : "Sign In"}
+        {formError ? (
+          <p role="alert" className="text-destructive -mt-1 text-sm">
+            {formError}
+          </p>
+        ) : null}
+
+        <Button type="submit" disabled={submitting} className="mt-1 h-10">
+          {submitting ? <Spinner className="size-4" /> : null}
+          {submitting ? "Signing in…" : "Sign in"}
         </Button>
       </form>
-
-      <div className="mt-4 text-sm text-muted-foreground">
-        Don't have an account?{" "}
-        <Link
-          href="/sign-up"
-          className="font-medium text-primary hover:underline"
-        >
-          Sign up
-        </Link>
-      </div>
-    </div>
+    </AuthCard>
   );
 };

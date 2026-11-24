@@ -26,7 +26,6 @@ import { TASK_PRIORITIES, TASK_PRIORITY_META } from "@/lib/task-view-state";
 import { useTRPC } from "@/trpc/client";
 import { WorkflowStatusRow } from "@/trpc/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DateField } from "./date-field";
@@ -47,7 +46,6 @@ export function CreateTaskDialog({
   defaultStatusId: string;
 }) {
   const trpc = useTRPC();
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [title, setTitle] = useState("");
@@ -63,16 +61,16 @@ export function CreateTaskDialog({
         toast.success(`"${task.title}" added`);
         reset();
         onOpenChange(false);
-        // The command menu's search reads a query the client owns outright, so
-        // that one is safe to invalidate; the board is refreshed below.
+        // Board, list and dashboard all read task.list from the client cache;
+        // refetch them directly rather than re-rendering the server tree.
         void queryClient.invalidateQueries({
           queryKey: trpc.task.list.pathKey(),
-          refetchType: "none",
         });
-        router.refresh();
+        void queryClient.invalidateQueries({
+          queryKey: trpc.project.list.pathKey(),
+        });
       },
       onError: (error) => {
-        console.log(error);
         toast.error("That task could not be created", {
           description:
             error.data?.code === "FORBIDDEN"

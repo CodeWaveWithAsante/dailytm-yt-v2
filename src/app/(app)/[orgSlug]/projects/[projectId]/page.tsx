@@ -6,11 +6,15 @@ import { AppHeader } from "@/components/app-shell/app-header";
 import { HydrateClient, prefetch, trpc } from "@/trpc/server";
 import { ProjectWorkspace } from "@/components/project/prohect-workspace";
 import { nextCursor } from "@/lib/task.queries";
+import {
+  boardViewInput,
+  listViewInput,
+  loadTaskViewState,
+} from "@/lib/task-view-state";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SettingsIcon } from "lucide-react";
 import { ProjectGlyph } from "@/components/project/project-client";
-import { CreateTaskDialog } from "@/components/project/task/task-form";
 
 const ProjectDetailsPage = async ({
   params,
@@ -32,9 +36,20 @@ const ProjectDetailsPage = async ({
 
   if (!project) notFound();
 
-  prefetch(
-    trpc.task.list.infiniteQueryOptions({}, { getNextPageParam: nextCursor }),
-  );
+  // Same inputs the client builds from the URL, so the cache keys match and
+  // the first paint is the real data rather than a skeleton.
+  const viewState = await loadTaskViewState(searchParams);
+  prefetch(trpc.workflow.list.queryOptions({ projectId }));
+  if (viewState.view === "board") {
+    prefetch(trpc.task.list.queryOptions(boardViewInput(projectId, viewState)));
+  } else {
+    prefetch(
+      trpc.task.list.infiniteQueryOptions(
+        listViewInput(projectId, viewState, { sort: "dueDate", order: "asc" }),
+        { getNextPageParam: nextCursor },
+      ),
+    );
+  }
 
   return (
     <>
@@ -59,11 +74,11 @@ const ProjectDetailsPage = async ({
         }
       />
 
-      <div className="flex items-center gap-3 border-b px-4 py-3 md:px-6">
+      <div className="flex items-center gap-3 border-b px-4 py-4 md:px-6">
         <ProjectGlyph color={project.color} icon={project.icon} size="lg" />
 
         <div className="min-w-0">
-          <h1 className="truncate text-base font-semibold tracking-heading">
+          <h1 className="truncate text-lg font-semibold tracking-[var(--tracking-heading)]">
             {project.name}
           </h1>
           {project.description && (
